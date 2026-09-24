@@ -1,666 +1,468 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relvo Assets Generator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Relvo Asset Generator</title>
   <style>
+    @font-face { font-family: 'Suisse Intl'; font-weight: 400; font-display: swap;
+      src: local('Suisse Intl Regular'), local('SuisseIntl-Regular'), url('fonts/SuisseIntl-Regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Suisse Intl'; font-weight: 500; font-display: swap;
+      src: local('Suisse Intl Medium'), local('SuisseIntl-Medium'), url('fonts/SuisseIntl-Medium.woff2') format('woff2'); }
+    @font-face { font-family: 'Suisse Intl'; font-weight: 600; font-display: swap;
+      src: local('Suisse Intl SemiBold'), local('SuisseIntl-SemiBold'), url('fonts/SuisseIntl-SemiBold.woff2') format('woff2'); }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #E8E8E8;
-      --surface: #FFFFFF;
-      --surface2: #F0F0F0;
-      --border: #D0D0D0;
-      --accent: #13131E;
-      --accent2: #3F28B2;
-      --text: #13131E;
-      --muted: #909090;
-      --radius: 10px;
+      --panel: #FFFFFF;
+      --stage: #F1F1F1;
+      --tile: #F0F0F0;
+      --tile-hover: #E6E6E6;
+      --ink: #000000;
+      --muted: #707070;
+      --line: #D9D9D9;
+      --pill: 999px;
+      --checker: repeating-conic-gradient(#E4E4E4 0% 25%, #FFFFFF 0% 50%) 0 0 / 16px 16px;
     }
 
+    html, body { height: 100%; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--panel);
+      color: var(--ink);
+      font-family: 'Suisse Intl', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
       font-size: 14px;
-      height: 100vh;
-      max-height: 100vh;
+      -webkit-font-smoothing: antialiased;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; background: none; border: none; }
 
-    header {
-      padding: 10px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-    header h1 {
-      font-size: 15px; font-weight: 500; letter-spacing: -0.02em;
-      color: var(--text);
-    }
-    .header-brand {
-      display: flex; align-items: center; gap: 8px;
-      color: var(--muted); font-size: 11px; font-weight: 500;
-    }
-    .header-brand svg { height: 16px; width: auto; display: block; }
-
-    .layout {
+    /* ── LAYOUT (desktop) ── */
+    .app {
+      height: 100vh; height: 100dvh;
       display: grid;
-      grid-template-columns: 300px 1fr;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
+      grid-template-columns: 420px 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+    .brand   { grid-column: 1; grid-row: 1; }
+    .controls{ grid-column: 1; grid-row: 1 / 3; }
+    .actions { grid-column: 1; grid-row: 3; }
+    .stage   { grid-column: 2; grid-row: 1 / -1; }
+
+    /* Frosted title: the list scrolls underneath, blurred, fading out at the bottom edge */
+    .brand {
+      padding: 32px 30px 36px; margin-right: 6px;
+      position: relative; z-index: 2; align-self: start;
+      background: rgba(255,255,255,0.55);
+      -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+      -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent);
+      mask-image: linear-gradient(to bottom, #000 65%, transparent);
+    }
+    .brand h1 {
+      font-size: 26px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;
     }
 
-    /* ── SIDEBAR ── */
-    .sidebar {
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .sidebar-scroll {
-      flex: 1;
+    .controls {
       overflow-y: auto;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      padding: 124px 30px 28px;
+      display: flex; flex-direction: column; gap: 30px;
+      min-height: 0;
     }
+    .controls::-webkit-scrollbar { width: 6px; }
+    .controls::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
 
-    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    .section-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 9px; font-weight: 400; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 12px;
     }
+    .section-label { font-size: 13px; font-weight: 600; }
+    .section-hint { font-size: 12px; color: var(--muted); }
+
+    /* ── PILLS ── */
+    .pill {
+      height: 42px; padding: 0 20px; border-radius: var(--pill);
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 13px; font-weight: 500; white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    }
+    .pill-dark { background: var(--ink); color: #fff; }
+    .pill-dark:hover { background: #2A2A2A; }
+    .pill-light { background: var(--tile); border: 1px solid transparent; }
+    .pill-light:hover { background: var(--tile-hover); }
+    .pill:disabled { opacity: 0.35; cursor: not-allowed; }
+    .pill svg { flex-shrink: 0; }
 
     /* ── SLOTS ── */
-    .slots {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
+    .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .slot {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: border-color 0.15s;
+      height: 42px; padding: 0 18px 0 20px; border-radius: var(--pill);
+      background: var(--tile); border: 1px solid transparent;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      font-size: 13px; font-weight: 500; text-align: left;
+      transition: border-color 0.15s, background 0.15s;
     }
-
-    .slot.has-shape { border-color: var(--border); }
-    .slot.slot-outer.has-shape { border-color: rgba(99,102,241,0.4); }
-
-    .slot-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 5px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .slot-tag {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      padding: 2px 7px; border-radius: 5px;
-    }
-    .slot-tag.outer { background: rgba(63,40,178,0.1); color: var(--accent2); border: 1px solid rgba(63,40,178,0.2); }
-    .slot-tag.inner { background: rgba(0,0,0,0.06); color: #666; border: 1px solid rgba(0,0,0,0.1); }
-
-    .slot-pct { font-size: 10px; color: var(--muted); }
-
-    .slot-body {
-      height: 60px;
-      display: flex; align-items: center; justify-content: center;
-      padding: 6px;
-      position: relative;
-    }
-
-    .slot-empty {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 4px; color: var(--muted);
-    }
-    .slot-empty svg { opacity: 0.4; }
-    .slot-empty span { font-size: 10px; }
-
-    .slot-preview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .slot-preview svg { max-width: 100%; max-height: 70px; }
-
-    .slot-footer {
-      padding: 4px 8px;
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      min-height: 22px;
-    }
-    .slot-name { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
-    .btn-clear {
-      background: none; border: none; cursor: pointer;
-      font-size: 10px; color: var(--muted); padding: 1px 4px; border-radius: 3px;
-    }
-    .btn-clear:hover { color: #f87171; background: rgba(248,113,113,0.1); }
-
-    /* ── RANDOMIZE ── */
-    .btn-random {
-      width: 100%; padding: 7px; border-radius: 8px;
-      background: var(--accent); border: 1px solid var(--accent);
-      color: #fff; font-size: 12px; font-weight: 600;
-      font-family: 'Instrument Sans', sans-serif;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      gap: 7px; transition: all 0.15s;
-    }
-    .btn-random:hover { background: var(--accent2); border-color: var(--accent2); }
-    .btn-random:disabled { opacity: 0.35; cursor: not-allowed; }
-    .btn-random svg { transition: transform 0.3s; }
-    .btn-random:hover svg { transform: rotate(180deg); }
+    .slot:hover { background: var(--tile-hover); }
+    .slot.active { border-color: var(--ink); }
+    .slot-pct { font-weight: 400; }
+    #btn-random { margin-top: 14px; }
 
     /* ── LIBRARY ── */
-    .library-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px;
+    .library-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
     }
-
-    .btn-add-shapes {
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--muted); font-size: 10px; font-weight: 600;
-      padding: 3px 8px; border-radius: 5px; cursor: pointer;
-      display: flex; align-items: center; gap: 4px; transition: all 0.1s;
+    .library-grid.dragover { outline: 1px dashed var(--ink); outline-offset: 4px; border-radius: 6px; }
+    .tile {
+      aspect-ratio: 1; position: relative;
+      background: var(--tile); border: 1px solid transparent; border-radius: 6px;
+      overflow: hidden; transition: background 0.15s, border-color 0.15s;
     }
-    .btn-add-shapes:hover { color: var(--text); border-color: var(--accent2); }
-
+    .tile:hover { background: var(--tile-hover); }
+    .tile.current { border-color: var(--ink); }
+    .tile img {
+      position: absolute; left: 24%; top: 20%; width: 52%; height: 52%;
+      object-fit: contain; pointer-events: none;
+    }
+    .tile-label {
+      position: absolute; left: 9px; bottom: 7px;
+      font-size: 11px; font-weight: 500;
+    }
+    .tile-badges { position: absolute; top: 7px; left: 7px; display: flex; gap: 3px; }
+    .badge {
+      background: var(--ink); color: #fff;
+      font-size: 9px; font-weight: 500; line-height: 1;
+      padding: 4px 7px; border-radius: var(--pill);
+    }
+    .tile-remove {
+      position: absolute; top: 5px; right: 5px;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
+      font-size: 13px; line-height: 1; color: var(--muted); background: var(--panel);
+    }
+    .tile:hover .tile-remove { display: flex; }
+    .tile-remove:hover { color: var(--ink); }
+    .tile-add {
+      aspect-ratio: 1; border: 1px dashed #BDBDBD; border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      font-size: 11px; font-weight: 500; color: var(--muted);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .tile-add:hover { border-color: var(--ink); color: var(--ink); }
     #library-file-input { display: none; }
 
-    .library-empty {
-      border: 1px dashed var(--border); border-radius: var(--radius);
-      padding: 24px 12px; text-align: center;
-      color: var(--muted); font-size: 12px;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .library-empty:hover { background: var(--surface2); }
-
-    .library-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
-    }
-
-    .shape-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px; overflow: hidden;
-      cursor: pointer; position: relative;
-      transition: border-color 0.15s;
-    }
-    .shape-card:hover { border-color: var(--accent2); }
-    .shape-card.selected-outer { border-color: var(--accent2) !important; box-shadow: 0 0 0 1px var(--accent2); }
-    .shape-card.selected-inner { border-color: #888 !important; box-shadow: 0 0 0 1px #888; }
-
-    .shape-thumb {
-      height: 46px; display: flex; align-items: center; justify-content: center;
-      padding: 5px; background: var(--bg);
-    }
-    .shape-thumb svg { max-width: 100%; max-height: 36px; }
-
-    .shape-actions {
-      display: none;
-      position: absolute; inset: 0;
-      background: rgba(232,232,232,0.92);
-      flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; padding: 6px;
-    }
-    .shape-card:hover .shape-actions { display: flex; }
-
-    .action-btn {
-      width: 100%; padding: 5px 4px; border-radius: 5px;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
-      border: none; cursor: pointer; transition: all 0.1s;
-    }
-    .action-btn.set-outer {
-      background: rgba(63,40,178,0.12); color: var(--accent2);
-      border: 1px solid rgba(63,40,178,0.25);
-    }
-    .action-btn.set-outer:hover { background: rgba(63,40,178,0.22); }
-    .action-btn.set-inner {
-      background: rgba(0,0,0,0.06); color: #555;
-      border: 1px solid rgba(0,0,0,0.12);
-    }
-    .action-btn.set-inner:hover { background: rgba(0,0,0,0.12); }
-
-    .shape-label {
-      padding: 4px 6px; font-size: 9px; color: var(--muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      border-top: 1px solid var(--border); text-align: center;
-    }
-
-    .shape-badges {
-      position: absolute; top: 4px; left: 4px;
-      display: flex; gap: 3px;
-    }
-    .badge {
-      font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
-      padding: 1px 5px; border-radius: 3px; line-height: 1.5;
-    }
-    .badge-outer { background: var(--accent2); color: white; }
-    .badge-inner { background: #888; color: white; }
-
-    /* ── CONTROLS ── */
-    .control-row {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .control-row label { font-size: 11px; color: var(--muted); white-space: nowrap; min-width: 40px; }
+    /* ── SLIDER ── */
+    .control-row { display: flex; align-items: center; gap: 22px; }
+    .control-row label { font-size: 13px; font-weight: 500; }
+    .value { font-size: 12px; font-weight: 500; min-width: 38px; text-align: right; font-variant-numeric: tabular-nums; }
     input[type="range"] {
-      -webkit-appearance: none; flex: 1; height: 3px;
-      background: var(--border); border-radius: 4px; outline: none;
+      -webkit-appearance: none; appearance: none; flex: 1; height: 20px;
+      background: transparent; cursor: pointer;
     }
+    input[type="range"]::-webkit-slider-runnable-track { height: 1px; background: var(--ink); }
+    input[type="range"]::-moz-range-track { height: 1px; background: var(--ink); }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 13px; height: 13px;
-      border-radius: 50%; background: var(--accent); cursor: pointer;
+      -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8.5px;
+      border-radius: 50%; background: var(--ink); border: none;
     }
-    .value-badge {
-      font-family: 'Geist Mono', monospace;
-      font-size: 11px; font-weight: 400; color: var(--accent2);
-      min-width: 34px; text-align: right;
-    }
+    input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: none; }
 
-    /* ── COLOR PICKERS ── */
-    .color-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .color-slot {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 6px 8px;
-      display: flex; flex-direction: column; gap: 5px;
+    /* ── COLORS ── */
+    .color-group + .color-group { margin-top: 16px; }
+    .color-group-head {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
     }
-    .color-slot-label {
-      font-family: 'Geist Mono', monospace;
-      font-size: 9px; font-weight: 400; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--muted);
+    .color-group-head span { font-size: 13px; font-weight: 500; }
+    .hex-field {
+      display: flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 4px 0 10px; border-radius: var(--pill); background: var(--tile);
     }
-    .color-slot-label.outer { color: var(--accent2); }
-    .color-row { display: flex; align-items: center; gap: 6px; }
-    input[type="color"].slot-color {
-      width: 22px; height: 22px; border-radius: 5px;
-      border: 1px solid var(--border); padding: 2px;
-      cursor: pointer; background: none; flex-shrink: 0;
+    .hex-field input[type="text"] {
+      width: 64px; border: none; background: none; outline: none;
+      font-size: 12px; text-transform: uppercase; font-variant-numeric: tabular-nums;
     }
-    .color-hex {
-      font-size: 11px; color: var(--text); font-family: 'Geist Mono', monospace;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 4px; padding: 3px 5px; width: 100%;
-      outline: none; text-transform: uppercase;
+    .swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+    .swatch {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      outline: 1px solid transparent; outline-offset: 2px;
+      transition: outline-color 0.15s, transform 0.1s;
     }
-    .color-hex:focus { border-color: var(--accent); }
-
-    /* ── PRESET PALETTE ── */
-    .preset-palette { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .preset-swatch {
-      width: 14px; height: 14px; border-radius: 3px; cursor: pointer;
-      border: 2px solid transparent; transition: border-color 0.15s, transform 0.1s;
-      flex-shrink: 0;
+    .swatch:hover { transform: scale(1.1); }
+    .swatch.active { outline-color: var(--ink); }
+    .swatch.checker { background: var(--checker); background-size: 8px 8px; }
+    .swatch-picker {
+      position: relative; overflow: hidden;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--panel); color: var(--ink);
     }
-    .preset-swatch:hover { transform: scale(1.2); }
-    .preset-swatch.active { border-color: var(--accent2); }
-
-    /* ── BG ── */
-    .bg-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
-    .bg-swatch {
-      width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
-      border: 2px solid transparent; transition: border-color 0.15s;
+    .swatch-picker:hover { transform: none; background: var(--ink); color: #fff; }
+    .swatch-picker input {
+      position: absolute; inset: -6px; width: 40px; height: 40px;
+      opacity: 0; cursor: pointer; border: none;
     }
-    .bg-swatch.active { border-color: var(--accent2); }
-    .bg-swatch.checker {
-      background: repeating-conic-gradient(#bbb 0% 25%, #e8e8e8 0% 50%) 0 0 / 10px 10px;
-    }
-    input[type="color"].swatch-color {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid var(--border); padding: 0;
-      cursor: pointer; background: none; overflow: hidden;
-    }
+    .hex-field .swatch-picker { width: 22px; height: 22px; }
 
     /* ── SIZE ── */
-    .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .size-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--muted); padding: 5px; border-radius: 7px;
-      cursor: pointer; font-size: 10px; font-weight: 400;
-      font-family: 'Geist Mono', monospace;
-      transition: all 0.1s; text-align: center;
-    }
-    .size-btn:hover { border-color: var(--accent); color: var(--text); }
-    .size-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(63,40,178,0.06); }
+    .size-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .size-grid .pill { height: 36px; padding: 0 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .size-grid .pill.active { border-color: var(--ink); }
 
-    .custom-size {
-      display: flex; gap: 5px; align-items: center; margin-top: 6px;
+    /* ── ACTIONS ── */
+    .actions {
+      padding: 16px 30px 24px;
+      display: flex; gap: 10px;
+      border-top: 1px solid #EFEFEF;
+      background: var(--panel);
     }
-    .custom-size input {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text); padding: 5px 7px; border-radius: 6px;
-      font-size: 11px; width: 64px; outline: none;
-    }
-    .custom-size input:focus { border-color: var(--accent); }
-    .custom-size span { color: var(--muted); font-size: 11px; }
+    .actions .pill { flex: 1; }
+    .actions .only-mobile { display: none; }
 
-    /* ── EXPORT ── */
-    .export-row { display: flex; gap: 7px; }
-    .btn {
-      flex: 1; padding: 7px; border-radius: 7px;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      border: none; transition: all 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .btn-primary { background: var(--accent); color: white; font-family: 'Instrument Sans', sans-serif; }
-    .btn-primary:hover { background: var(--accent2); }
-    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-    .btn-secondary {
-      background: var(--surface); color: var(--text);
-      border: 1px solid var(--border);
-      font-family: 'Instrument Sans', sans-serif;
-    }
-    .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
-    .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ── CANVAS ── */
-    .canvas-area { display: flex; flex-direction: column; overflow: hidden; }
-
-    .canvas-toolbar {
-      padding: 7px 16px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-    }
-
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-    .status-dot.ready { background: #34d399; }
-    .status-dot.partial { background: #fbbf24; }
-    .status-text { font-size: 11px; color: var(--muted); }
-
-    .zoom-controls { display: flex; align-items: center; gap: 4px; margin-left: auto; }
-    .zoom-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--muted); width: 26px; height: 26px; border-radius: 5px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 14px; transition: all 0.1s;
-    }
-    .zoom-btn:hover { border-color: var(--accent); color: var(--text); }
-    .zoom-label { font-size: 11px; color: var(--muted); min-width: 38px; text-align: center; }
-
-    .canvas-viewport {
-      flex: 1; overflow: auto;
+    /* ── STAGE ── */
+    .stage {
+      background: var(--stage);
+      transition: background 0.2s;
+      position: relative; min-height: 0; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
-      padding: 40px;
-      background: #E8E8E8;
     }
-
-    .canvas-frame {
-      position: relative;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 8px 32px rgba(0,0,0,0.12);
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
     #composite-svg { display: block; }
-
+    .stage-meta {
+      position: absolute; top: 24px; left: 28px;
+      font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
+    }
+    .stage.dark .stage-meta, .stage.dark .empty-state { color: #8A8A8A; }
     .empty-state {
       position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 10px; pointer-events: none;
-    }
-    .empty-ring {
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 2px dashed var(--border);
       display: flex; align-items: center; justify-content: center;
-      color: var(--border);
+      font-size: 13px; color: var(--muted); pointer-events: none;
     }
-    .empty-state p { font-size: 12px; color: var(--muted); }
 
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .credit {
+      display: inline-flex; align-items: center; gap: 14px;
+      height: 42px; padding: 0 20px; border-radius: var(--pill);
+      background: var(--panel); color: var(--ink);
+      font-size: 12px; font-weight: 500; text-decoration: none; white-space: nowrap;
+    }
+    .credit svg { height: 17px; width: auto; display: block; }
+    .stage .credit { position: absolute; right: 28px; bottom: 28px; }
+    .controls .credit { display: none; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 820px) {
+      body { overflow: auto; }
+      .app { display: flex; flex-direction: column; height: auto; min-height: 100dvh; }
+
+      .brand { order: 1; padding: 20px 16px 16px; }
+      .brand {
+        margin-right: 0; background: var(--panel);
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        -webkit-mask-image: none; mask-image: none;
+      }
+      .brand h1 { font-size: 22px; }
+      .brand h1 br { display: none; }
+
+      .stage {
+        order: 2;
+        position: sticky; top: 0; z-index: 5;
+        height: min(100vw, 46vh); flex-shrink: 0;
+      }
+      .stage .credit { display: none; }
+      .stage-meta { top: 12px; left: 16px; font-size: 11px; }
+
+      .controls {
+        order: 3; overflow: visible;
+        padding: 24px 16px calc(100px + env(safe-area-inset-bottom));
+        gap: 28px;
+      }
+      .controls .credit { display: inline-flex; align-self: flex-start; background: var(--tile); }
+
+      #btn-random { display: none; }
+      .slots { gap: 10px; }
+      .slot { padding: 0 16px; }
+
+      .tile-remove { display: flex; }
+      .tile-label { left: 7px; bottom: 6px; font-size: 10px; }
+
+      .swatch { width: 30px; height: 30px; }
+      .swatches { gap: 8px; }
+      .hex-field { height: 34px; }
+
+      .actions {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+        border-top: 1px solid #EFEFEF;
+      }
+      .actions .only-mobile { display: inline-flex; }
+      .actions .pill { height: 46px; padding: 0 14px; }
+      .actions #btn-svg { flex: 0 0 auto; }
+    }
+
+    @media (hover: none) {
+      .tile:hover, .slot:hover, .pill-light:hover { background: var(--tile); }
+      .swatch:hover { transform: none; }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Relvo Assets Generator</h1>
-  <div class="header-brand">
-    <span>Desarrollado por</span>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3133.63 453.85" fill="#434343">
+<div class="app">
+
+  <header class="brand">
+    <h1>Relvo<br> Asset Generator</h1>
+  </header>
+
+  <!-- CANVAS -->
+  <main class="stage" id="stage">
+    <span class="stage-meta" id="stage-meta">800 × 800</span>
+    <svg id="composite-svg" width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="empty-state" id="empty-state">Elige una forma para empezar</div>
+    <a class="credit" href="https://puchworks.com" target="_blank" rel="noopener">
+      Desarrollado por <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3133.63 453.85" fill="currentColor" aria-label="PUCHWORKS">
       <path d="M138.54,208.12h-9.4v-86.5h8.14c26.34,0,47.65,11.91,47.65,41.37,0,25.7-13.8,45.13-46.4,45.13M659.45,177.01V7.52h-127.25v276.45c0,30.09-16.93,51.4-47.65,51.4s-48.26-21.31-48.26-55.17V7.52h-129.14v108.7C290.52,44.94,231.5,7.52,129.77,7.52H0v438.81h129.14v-136.66h5.64c104.12,0,156.86-49.17,172.36-108.46v95.29c0,102.18,70.85,156.72,177.41,156.72s174.9-56.42,174.9-161.1v-11.51c20.76,100.42,105.3,173.24,218.12,173.24,29.47,0,65.84-5.64,92.78-16.3v-144.18c-15.67,18.18-46.38,35.1-87.13,35.1-61.43,0-99.67-45.13-99.67-101.55s36.36-101.55,99.67-101.55c41.37,0,71.45,18.81,87.13,38.24V14.41c-26.32-9.4-61.43-14.41-92.14-14.41-99.19,0-195.97,58.45-218.76,177.01"/>
       <path d="M2565.18,390.92l-56.39-134.53c24.58-14.13,48.92-43.22,56.39-80.83v215.36ZM2394.07,198.71h-9.39v-82.12h8.14c26.33,0,47.64,11.91,47.64,41.37,0,21.31-13.78,40.75-46.38,40.75M2034.07,328.47c-61.45,0-99.67-45.13-99.67-101.55s36.35-101.55,99.67-101.55,99.65,45.77,99.65,101.55-39.47,101.55-99.65,101.55M3079.27,201.03l-46.31-56.64c-11.06-12.29-12.48-20.23-12.48-25.77,0-12.47,9.85-15.09,18.12-15.09,12.9,0,31.02,6.11,53.87,18.18l15.14,7.98V12.84l-7.45-2.16C3075.65,3.6,3052.3,0,3030.75,0c-78.77,0-127.7,46.15-127.7,120.43,0,40.16,13.95,74.9,42.33,105.84l49.01,58.69c12.05,14.46,16.97,24.82,16.97,35.74,0,4.93,0,19.94-21.75,19.94-17.31,0-39.7-9.88-68.47-30.19l-16.27-11.48v103.93l-8.71-16.26-93.38-174.15,118.48-204.99h-134.15l-92.77,170.51V7.52h-129.14v114.28c-12.46-73.55-72.36-114.28-179.88-114.28h-129.77v157.88C2230.52,60.03,2142.29,0,2035.94,0,1953.03,0,1868.33,41.02,1828.6,123.67l23.69-116.15h-130.38l-22.57,211.25-50.16-211.25h-100.92l-45.13,211.25-24.44-211.25h-245.07v154.21h-107.83V7.52h-129.13v438.81h129.13v-159.22h107.83v159.22h129.13V99.22l71.44,347.73h116.59l48.28-231.31,50.14,231.31h113.47l42.84-210.02c2.65,122.3,101.19,216.91,229.82,216.91,98.69,0,193.95-61.02,220.21-166.47v158.95h129.15v-173.64h5.64l53.29,173.64h250.72v-163.61l4.38-9.4,87.75,173.01h153.54c19.02,4.73,39.25,7.52,58.67,7.52,83.25,0,134.96-49.62,134.96-129.51,0-51.87-20.91-85.77-54.36-123.31"/>
     </svg>
-  </div>
-</header>
+    </a>
+  </main>
 
-<div class="layout">
+  <!-- CONTROLS -->
+  <section class="controls" id="controls">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-scroll">
-
-      <!-- ACTIVE SLOTS -->
-      <div>
-        <div class="section-label">Composition</div>
-        <div class="slots">
-          <div class="slot slot-outer" id="slot-outer">
-            <div class="slot-header">
-              <span class="slot-tag outer">Outer</span>
-              <span class="slot-pct">100%</span>
-            </div>
-            <div class="slot-body">
-              <div class="slot-empty" id="slot-outer-empty">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-                <span>No shape</span>
-              </div>
-              <div class="slot-preview" id="slot-outer-preview" style="display:none"></div>
-            </div>
-            <div class="slot-footer">
-              <span class="slot-name" id="slot-outer-name">—</span>
-              <button class="btn-clear" id="slot-outer-clear" onclick="clearSlot('outer')" style="display:none">✕</button>
-            </div>
-          </div>
-
-          <div class="slot slot-inner" id="slot-inner">
-            <div class="slot-header">
-              <span class="slot-tag inner">Inner</span>
-              <span class="slot-pct" id="inner-pct-label">67%</span>
-            </div>
-            <div class="slot-body">
-              <div class="slot-empty" id="slot-inner-empty">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-                <span>No shape</span>
-              </div>
-              <div class="slot-preview" id="slot-inner-preview" style="display:none"></div>
-            </div>
-            <div class="slot-footer">
-              <span class="slot-name" id="slot-inner-name">—</span>
-              <button class="btn-clear" id="slot-inner-clear" onclick="clearSlot('inner')" style="display:none">✕</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- RANDOMIZE -->
-        <button class="btn-random" id="btn-random" onclick="randomize()" disabled style="margin-top:10px">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22M18 2l4 4-4 4M18 14l4 4-4 4"/>
-          </svg>
-          Randomize
+    <div>
+      <div class="section-head"><span class="section-label">Composición</span></div>
+      <div class="slots">
+        <button class="slot active" id="slot-outer" onclick="setActiveSlot('outer')">
+          <span>Outer</span>
+          <span class="slot-pct">100%</span>
+        </button>
+        <button class="slot" id="slot-inner" onclick="setActiveSlot('inner')">
+          <span>Inner</span>
+          <span class="slot-pct">67%</span>
         </button>
       </div>
-
-      <!-- SHAPE LIBRARY -->
-      <div>
-        <div class="library-header">
-          <div class="section-label" style="margin:0">Shape Library</div>
-          <button class="btn-add-shapes" onclick="document.getElementById('library-file-input').click()">
-            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Add SVGs
-          </button>
-          <input type="file" id="library-file-input" accept=".svg,image/svg+xml" multiple />
-        </div>
-
-        <div class="library-empty" id="library-empty" onclick="document.getElementById('library-file-input').click()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 6px;display:block;opacity:0.4"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          Drop SVG files here or click to browse
-        </div>
-
-        <div class="library-grid" id="library-grid" style="display:none"></div>
-      </div>
-
-      <!-- STROKE -->
-      <div>
-        <div class="section-label">Outline</div>
-        <div class="control-row">
-          <label>Width</label>
-          <input type="range" id="stroke-slider" min="0.5" max="8" value="1" step="0.5" oninput="onStrokeChange(this.value)" />
-          <span class="value-badge" id="stroke-value">1px</span>
-        </div>
-      </div>
-
-      <!-- COLORS -->
-      <div>
-        <div class="section-label">Shape Colors</div>
-        <div class="color-pair">
-          <div class="color-slot">
-            <span class="color-slot-label outer">Outer</span>
-            <div class="color-row">
-              <input type="color" class="slot-color" id="color-outer" value="#ffffff" oninput="onColorChange('outer', this.value)" />
-              <input type="text" class="color-hex" id="hex-outer" value="#FFFFFF" maxlength="7"
-                oninput="onHexInput('outer', this.value)"
-                onblur="syncHexDisplay('outer')" />
-            </div>
-            <div class="preset-palette" id="palette-outer"></div>
-          </div>
-          <div class="color-slot">
-            <span class="color-slot-label">Inner</span>
-            <div class="color-row">
-              <input type="color" class="slot-color" id="color-inner" value="#ffffff" oninput="onColorChange('inner', this.value)" />
-              <input type="text" class="color-hex" id="hex-inner" value="#FFFFFF" maxlength="7"
-                oninput="onHexInput('inner', this.value)"
-                onblur="syncHexDisplay('inner')" />
-            </div>
-            <div class="preset-palette" id="palette-inner"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BACKGROUND -->
-      <div>
-        <div class="section-label">Background</div>
-        <div class="bg-row">
-          <div class="bg-swatch active" style="background:#E8E8E8;border-color:var(--accent2)" data-color="#E8E8E8" onclick="setBg(this)"></div>
-          <div class="bg-swatch" style="background:#13131E" data-color="#13131E" onclick="setBg(this)"></div>
-          <div class="bg-swatch" style="background:#ffffff" data-color="#ffffff" onclick="setBg(this)"></div>
-          <div class="bg-swatch" style="background:#B8D12A" data-color="#B8D12A" onclick="setBg(this)"></div>
-          <div class="bg-swatch" style="background:#3F28B2" data-color="#3F28B2" onclick="setBg(this)"></div>
-          <div class="bg-swatch checker" data-color="transparent" onclick="setBg(this)"></div>
-          <input type="color" class="swatch-color" id="custom-bg" value="#E8E8E8" oninput="setCustomBg(this.value)" title="Custom" />
-        </div>
-      </div>
-
-      <!-- CANVAS SIZE -->
-      <div>
-        <div class="section-label">Canvas Size</div>
-        <div class="size-grid">
-          <button class="size-btn active" onclick="setSize(800,800,this)">800 × 800</button>
-          <button class="size-btn" onclick="setSize(1080,1080,this)">1080 × 1080</button>
-          <button class="size-btn" onclick="setSize(1200,630,this)">1200 × 630</button>
-          <button class="size-btn" onclick="setSize(2000,2000,this)">2000 × 2000</button>
-        </div>
-        <div class="custom-size" style="display:none">
-          <input type="number" id="custom-w" placeholder="W" min="100" max="4000" />
-          <span>×</span>
-          <input type="number" id="custom-h" placeholder="H" min="100" max="4000" />
-          <button class="btn-secondary" style="flex:0;padding:5px 9px;font-size:10px;" onclick="applyCustomSize()">Apply</button>
-        </div>
-      </div>
-
-      <!-- EXPORT -->
-      <div>
-        <div class="section-label">Export</div>
-        <div class="export-row">
-          <button class="btn btn-secondary" id="btn-svg" onclick="exportSVG()" disabled>
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            SVG
-          </button>
-          <button class="btn btn-primary" id="btn-png" onclick="exportPNG()" disabled>
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            PNG
-          </button>
-        </div>
-      </div>
-
+      <button class="pill pill-dark" id="btn-random" onclick="randomize()">Randomize</button>
     </div>
-  </aside>
 
-  <!-- CANVAS -->
-  <main class="canvas-area">
-    <div class="canvas-toolbar">
-      <div class="status-dot" id="status-dot"></div>
-      <span class="status-text" id="status-text">Add shapes to the library</span>
-      <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoom(-0.1)">−</button>
-        <span class="zoom-label" id="zoom-label">100%</span>
-        <button class="zoom-btn" onclick="zoom(0.1)">+</button>
-        <button class="zoom-btn" onclick="resetZoom()" title="Fit to view">⊡</button>
+    <div>
+      <div class="section-head">
+        <span class="section-label">Shapes</span>
+        <span class="section-hint" id="library-hint">Toca para asignar a Outer</span>
+      </div>
+      <div class="library-grid" id="library-grid"></div>
+      <input type="file" id="library-file-input" accept=".svg,image/svg+xml" multiple />
+    </div>
+
+    <div>
+      <div class="section-head"><span class="section-label">Outline</span></div>
+      <div class="control-row">
+        <label for="stroke-slider">Width</label>
+        <input type="range" id="stroke-slider" min="0.5" max="8" value="1" step="0.5" oninput="onStrokeChange(this.value)" />
+        <span class="value" id="stroke-value">1 px</span>
       </div>
     </div>
 
-    <div class="canvas-viewport" id="canvas-viewport">
-      <div class="canvas-frame" id="canvas-frame" style="width:800px;height:800px;background:transparent;">
-        <div class="empty-state" id="empty-state">
-          <div class="empty-ring">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></svg>
-          </div>
-          <p>Assign outer & inner shapes</p>
+    <div>
+      <div class="section-head"><span class="section-label">Shape colors</span></div>
+      <div class="color-group">
+        <div class="color-group-head">
+          <span>Outer</span>
+          <label class="hex-field">
+            <input type="text" id="hex-outer" value="#FFFFFF" maxlength="7"
+              oninput="onHexInput('outer', this.value)" onblur="syncHexDisplay('outer')" />
+            <span class="swatch swatch-picker" title="Elegir color"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg><input type="color" id="color-outer" value="#ffffff" oninput="onColorChange('outer', this.value)" /></span>
+          </label>
         </div>
-        <svg id="composite-svg" width="800" height="800"
-          xmlns="http://www.w3.org/2000/svg"
-          style="position:absolute;top:0;left:0;"></svg>
+        <div class="swatches" id="palette-outer"></div>
+      </div>
+      <div class="color-group">
+        <div class="color-group-head">
+          <span>Inner</span>
+          <label class="hex-field">
+            <input type="text" id="hex-inner" value="#FFFFFF" maxlength="7"
+              oninput="onHexInput('inner', this.value)" onblur="syncHexDisplay('inner')" />
+            <span class="swatch swatch-picker" title="Elegir color"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg><input type="color" id="color-inner" value="#ffffff" oninput="onColorChange('inner', this.value)" /></span>
+          </label>
+        </div>
+        <div class="swatches" id="palette-inner"></div>
       </div>
     </div>
-  </main>
+
+    <div>
+      <div class="section-head"><span class="section-label">Background</span></div>
+      <div class="swatches" id="bg-swatches">
+        <button class="swatch active" style="background:#F1F1F1" data-color="#F1F1F1" onclick="setBg(this)" title="Gris claro #F1F1F1"></button>
+        <button class="swatch" style="background:#2B2B2B" data-color="#2B2B2B" onclick="setBg(this)" title="Gris oscuro #2B2B2B"></button>
+        <button class="swatch checker" data-color="transparent" onclick="setBg(this)" title="Transparente (solo al exportar)"></button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-head"><span class="section-label">Canvas size</span></div>
+      <div class="size-grid">
+        <button class="pill pill-light active" onclick="setSize(800,800,this)">800 × 800</button>
+        <button class="pill pill-light" onclick="setSize(1080,1080,this)">1080 × 1080</button>
+        <button class="pill pill-light" onclick="setSize(1200,630,this)">1200 × 630</button>
+        <button class="pill pill-light" onclick="setSize(2000,2000,this)">2000 × 2000</button>
+      </div>
+    </div>
+
+    <a class="credit" href="https://puchworks.com" target="_blank" rel="noopener">
+      Desarrollado por <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3133.63 453.85" fill="currentColor" aria-label="PUCHWORKS">
+      <path d="M138.54,208.12h-9.4v-86.5h8.14c26.34,0,47.65,11.91,47.65,41.37,0,25.7-13.8,45.13-46.4,45.13M659.45,177.01V7.52h-127.25v276.45c0,30.09-16.93,51.4-47.65,51.4s-48.26-21.31-48.26-55.17V7.52h-129.14v108.7C290.52,44.94,231.5,7.52,129.77,7.52H0v438.81h129.14v-136.66h5.64c104.12,0,156.86-49.17,172.36-108.46v95.29c0,102.18,70.85,156.72,177.41,156.72s174.9-56.42,174.9-161.1v-11.51c20.76,100.42,105.3,173.24,218.12,173.24,29.47,0,65.84-5.64,92.78-16.3v-144.18c-15.67,18.18-46.38,35.1-87.13,35.1-61.43,0-99.67-45.13-99.67-101.55s36.36-101.55,99.67-101.55c41.37,0,71.45,18.81,87.13,38.24V14.41c-26.32-9.4-61.43-14.41-92.14-14.41-99.19,0-195.97,58.45-218.76,177.01"/>
+      <path d="M2565.18,390.92l-56.39-134.53c24.58-14.13,48.92-43.22,56.39-80.83v215.36ZM2394.07,198.71h-9.39v-82.12h8.14c26.33,0,47.64,11.91,47.64,41.37,0,21.31-13.78,40.75-46.38,40.75M2034.07,328.47c-61.45,0-99.67-45.13-99.67-101.55s36.35-101.55,99.67-101.55,99.65,45.77,99.65,101.55-39.47,101.55-99.65,101.55M3079.27,201.03l-46.31-56.64c-11.06-12.29-12.48-20.23-12.48-25.77,0-12.47,9.85-15.09,18.12-15.09,12.9,0,31.02,6.11,53.87,18.18l15.14,7.98V12.84l-7.45-2.16C3075.65,3.6,3052.3,0,3030.75,0c-78.77,0-127.7,46.15-127.7,120.43,0,40.16,13.95,74.9,42.33,105.84l49.01,58.69c12.05,14.46,16.97,24.82,16.97,35.74,0,4.93,0,19.94-21.75,19.94-17.31,0-39.7-9.88-68.47-30.19l-16.27-11.48v103.93l-8.71-16.26-93.38-174.15,118.48-204.99h-134.15l-92.77,170.51V7.52h-129.14v114.28c-12.46-73.55-72.36-114.28-179.88-114.28h-129.77v157.88C2230.52,60.03,2142.29,0,2035.94,0,1953.03,0,1868.33,41.02,1828.6,123.67l23.69-116.15h-130.38l-22.57,211.25-50.16-211.25h-100.92l-45.13,211.25-24.44-211.25h-245.07v154.21h-107.83V7.52h-129.13v438.81h129.13v-159.22h107.83v159.22h129.13V99.22l71.44,347.73h116.59l48.28-231.31,50.14,231.31h113.47l42.84-210.02c2.65,122.3,101.19,216.91,229.82,216.91,98.69,0,193.95-61.02,220.21-166.47v158.95h129.15v-173.64h5.64l53.29,173.64h250.72v-163.61l4.38-9.4,87.75,173.01h153.54c19.02,4.73,39.25,7.52,58.67,7.52,83.25,0,134.96-49.62,134.96-129.51,0-51.87-20.91-85.77-54.36-123.31"/>
+    </svg>
+    </a>
+  </section>
+
+  <!-- ACTIONS -->
+  <footer class="actions">
+    <button class="pill pill-light only-mobile" onclick="randomize()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22M18 2l4 4-4 4M18 14l4 4-4 4"/></svg>
+      Randomize
+    </button>
+    <button class="pill pill-light" id="btn-svg" onclick="exportSVG()" disabled>SVG</button>
+    <button class="pill pill-dark" id="btn-png" onclick="exportPNG()" disabled>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Descargar PNG
+    </button>
+  </footer>
 
 </div>
 
 <script>
   // ── State ──────────────────────────────────────────────────────
-  const library = [];   // [{ id, filename, svgText, viewBox }]
+  const library = [];   // [{ id, filename, svgText, viewBox, thumb }]
   let nextId = 0;
 
   const slots = { outer: null, inner: null };  // shape id or null
+  let activeSlot = 'outer';
 
   const config = {
     scale: 0.67, // fixed: inner is always 33% smaller than outer
-    bgColor: '#E8E8E8',
+    bgColor: '#F1F1F1',
     canvasW: 800,
     canvasH: 800,
-    zoom: 1,
     strokeWidth: 1,
   };
 
-  const slotColors = { outer: '#ffffff', inner: '#ffffff' };
+  // Default shape ink per background tone; flips with the background until the user picks a color
+  const INK = { light: '#13131E', dark: '#F1F1F1' };
+  const DARK_BGS = ['#2B2B2B'];
+  const slotColors = { outer: INK.light, inner: INK.light };
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const DRAWN = 'path,circle,ellipse,rect,line,polyline,polygon';
 
-  // ── File input ─────────────────────────────────────────────────
-  document.getElementById('library-file-input').addEventListener('change', e => {
+  // ── File input / drop ──────────────────────────────────────────
+  const fileInput = document.getElementById('library-file-input');
+  fileInput.addEventListener('change', e => {
     Array.from(e.target.files).forEach(f => loadFile(f));
     e.target.value = '';
   });
 
-  // Drag onto library empty
-  const libEmpty = document.getElementById('library-empty');
-  libEmpty.addEventListener('dragover', e => { e.preventDefault(); libEmpty.style.background = 'var(--surface2)'; });
-  libEmpty.addEventListener('dragleave', () => { libEmpty.style.background = ''; });
-  libEmpty.addEventListener('drop', e => {
-    e.preventDefault(); libEmpty.style.background = '';
+  const grid = document.getElementById('library-grid');
+  grid.addEventListener('dragover', e => { e.preventDefault(); grid.classList.add('dragover'); });
+  grid.addEventListener('dragleave', () => grid.classList.remove('dragover'));
+  grid.addEventListener('drop', e => {
+    e.preventDefault(); grid.classList.remove('dragover');
     Array.from(e.dataTransfer.files)
       .filter(f => f.type === 'image/svg+xml' || f.name.endsWith('.svg'))
       .forEach(f => loadFile(f));
@@ -669,31 +471,32 @@
   function loadFile(file) {
     const reader = new FileReader();
     reader.onload = e => {
-      const svgText = sanitizeSVG(e.target.result);
-      const viewBox = extractViewBox(svgText);
-      const shape = { id: nextId++, filename: file.name, svgText, viewBox };
-      library.push(shape);
+      addShape(file.name.replace(/\.svg$/i, ''), e.target.result);
       renderLibrary();
-      updateRandomBtn();
     };
     reader.readAsText(file);
   }
 
+  function addShape(name, raw) {
+    const svgText = sanitizeSVG(raw);
+    const shape = { id: nextId++, filename: name, svgText, viewBox: extractViewBox(svgText) };
+    shape.thumb = thumbURL(shape);
+    library.push(shape);
+    return shape;
+  }
+
   // ── Sanitize ───────────────────────────────────────────────────
   function sanitizeSVG(svgText) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgText, 'image/svg+xml');
+    const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
     doc.querySelectorAll('script').forEach(n => n.remove());
-    doc.querySelectorAll('[onclick],[onload],[onerror],[onmouseover]').forEach(n => {
-      ['onclick','onload','onerror','onmouseover'].forEach(a => n.removeAttribute(a));
+    doc.querySelectorAll('*').forEach(n => {
+      Array.from(n.attributes).forEach(a => { if (/^on/i.test(a.name)) n.removeAttribute(a.name); });
     });
     return new XMLSerializer().serializeToString(doc.documentElement);
   }
 
   function extractViewBox(svgText) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgText, 'image/svg+xml');
-    const svg = doc.querySelector('svg');
+    const svg = new DOMParser().parseFromString(svgText, 'image/svg+xml').querySelector('svg');
     if (!svg) return { x:0, y:0, w:100, h:100 };
     const vb = svg.getAttribute('viewBox');
     if (vb) {
@@ -703,279 +506,197 @@
     return { x:0, y:0, w: parseFloat(svg.getAttribute('width'))||100, h: parseFloat(svg.getAttribute('height'))||100 };
   }
 
+  // Strip source <style> and force outline-only drawing in the given color
+  function restyle(root, color, width) {
+    root.querySelectorAll('style').forEach(s => s.remove());
+    root.querySelectorAll(DRAWN).forEach(el => {
+      el.setAttribute('vector-effect', 'non-scaling-stroke');
+      el.style.fill = 'none';
+      el.style.stroke = color;
+      el.style.strokeWidth = width + 'px';
+    });
+  }
+
+  // Thumbnail as a lightweight <img> — black outline for the light tiles
+  function thumbURL(shape) {
+    const doc = new DOMParser().parseFromString(shape.svgText, 'image/svg+xml');
+    const svg = doc.querySelector('svg');
+    if (!svg) return '';
+    restyle(svg, '#000000', 0.35);
+    const { x, y, w, h } = shape.viewBox;
+    svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+    svg.removeAttribute('width'); svg.removeAttribute('height');
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  }
+
   // ── Library rendering ──────────────────────────────────────────
   function renderLibrary() {
-    const grid = document.getElementById('library-grid');
-    const empty = document.getElementById('library-empty');
-
-    if (library.length === 0) {
-      empty.style.display = '';
-      grid.style.display = 'none';
-      return;
-    }
-    empty.style.display = 'none';
-    grid.style.display = 'grid';
     grid.innerHTML = '';
 
     library.forEach(shape => {
       const isOuter = slots.outer === shape.id;
       const isInner = slots.inner === shape.id;
 
-      const card = document.createElement('div');
-      card.className = 'shape-card' +
-        (isOuter ? ' selected-outer' : '') +
-        (isInner ? ' selected-inner' : '');
-      card.dataset.id = shape.id;
+      const tile = document.createElement('button');
+      tile.className = 'tile' + (slots[activeSlot] === shape.id ? ' current' : '');
+      tile.title = shape.filename;
+      tile.onclick = () => pickShape(shape.id);
 
-      // Thumb
-      const thumb = document.createElement('div');
-      thumb.className = 'shape-thumb';
-      const tmpSvg = svgForThumb(shape.svgText);
-      thumb.appendChild(tmpSvg);
+      const img = document.createElement('img');
+      img.src = shape.thumb; img.alt = '';
 
-      // Badges
-      const badges = document.createElement('div');
-      badges.className = 'shape-badges';
-      if (isOuter) { const b = document.createElement('span'); b.className='badge badge-outer'; b.textContent='OUT'; badges.appendChild(b); }
-      if (isInner) { const b = document.createElement('span'); b.className='badge badge-inner'; b.textContent='IN'; badges.appendChild(b); }
+      const badges = document.createElement('span');
+      badges.className = 'tile-badges';
+      if (isInner) badges.insertAdjacentHTML('beforeend', '<span class="badge">IN</span>');
+      if (isOuter) badges.insertAdjacentHTML('beforeend', '<span class="badge">OUT</span>');
 
-      // Actions overlay
-      const actions = document.createElement('div');
-      actions.className = 'shape-actions';
+      const label = document.createElement('span');
+      label.className = 'tile-label';
+      label.textContent = shape.filename;
 
-      const btnOuter = document.createElement('button');
-      btnOuter.className = 'action-btn set-outer';
-      btnOuter.textContent = isOuter ? '✓ Outer' : 'Set Outer';
-      btnOuter.onclick = (e) => { e.stopPropagation(); setSlot('outer', shape.id); };
+      const del = document.createElement('span');
+      del.className = 'tile-remove';
+      del.title = 'Quitar de la librería';
+      del.textContent = '×';
+      del.onclick = e => { e.stopPropagation(); removeShape(shape.id); };
 
-      const btnInner = document.createElement('button');
-      btnInner.className = 'action-btn set-inner';
-      btnInner.textContent = isInner ? '✓ Inner' : 'Set Inner';
-      btnInner.onclick = (e) => { e.stopPropagation(); setSlot('inner', shape.id); };
-
-      const btnDel = document.createElement('button');
-      btnDel.className = 'action-btn';
-      btnDel.style.cssText = 'background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.2);margin-top:2px;';
-      btnDel.textContent = 'Remove';
-      btnDel.onclick = (e) => { e.stopPropagation(); removeShape(shape.id); };
-
-      actions.append(btnOuter, btnInner, btnDel);
-
-      // Label
-      const label = document.createElement('div');
-      label.className = 'shape-label';
-      label.textContent = shape.filename.replace(/\.svg$/i, '');
-
-      card.append(thumb, badges, actions, label);
-      grid.appendChild(card);
+      tile.append(img, badges, label, del);
+      grid.appendChild(tile);
     });
-  }
 
-  function svgForThumb(svgText) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgText, 'image/svg+xml');
-    const svg = doc.querySelector('svg');
-    if (!svg) { const d = document.createElement('div'); return d; }
-    const clone = svg.cloneNode(true);
-    clone.setAttribute('width', '100%');
-    clone.setAttribute('height', '100%');
-    clone.style.maxHeight = '52px';
-    // import into document
-    return document.adoptNode(clone);
-  }
-
-  // ── Stroke color extraction ─────────────────────────────────────
-  function extractStrokeColor(svgText) {
-    const m = svgText.match(/stroke\s*:\s*(#[0-9a-fA-F]{3,8})/);
-    return m ? m[1].toUpperCase() : '#FFFFFF';
-  }
-
-  function setColorUI(slot, hex) {
-    const h = hex.toUpperCase();
-    document.getElementById(`color-${slot}`).value = h;
-    document.getElementById(`hex-${slot}`).value = h;
-    document.querySelectorAll(`#palette-${slot} .preset-swatch`).forEach(sw => {
-      sw.classList.toggle('active', sw.dataset.color.toUpperCase() === h);
-    });
+    const add = document.createElement('button');
+    add.className = 'tile-add';
+    add.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add SVG';
+    add.onclick = () => fileInput.click();
+    grid.appendChild(add);
   }
 
   // ── Slot management ────────────────────────────────────────────
+  function setActiveSlot(slot) {
+    activeSlot = slot;
+    document.getElementById('slot-outer').classList.toggle('active', slot === 'outer');
+    document.getElementById('slot-inner').classList.toggle('active', slot === 'inner');
+    document.getElementById('library-hint').textContent =
+      `Toca para asignar a ${slot === 'outer' ? 'Outer' : 'Inner'}`;
+    renderLibrary();
+  }
+
+  // Tap a shape: assign it to the active slot (tap again to clear)
+  function pickShape(shapeId) {
+    if (slots[activeSlot] === shapeId) { clearSlot(activeSlot); return; }
+    const slot = activeSlot;
+    setSlot(slot, shapeId);
+    // Guide the first composition: after Outer, move on to an empty Inner
+    if (slot === 'outer' && slots.inner === null) setActiveSlot('inner');
+  }
+
   function setSlot(slot, shapeId) {
     // If this shape is already in the OTHER slot, swap
     const other = slot === 'outer' ? 'inner' : 'outer';
-    if (slots[other] === shapeId) {
-      slots[other] = slots[slot];
-      // keep other slot's color unchanged (user may have customised it)
-    }
+    if (slots[other] === shapeId) slots[other] = slots[slot];
     slots[slot] = shapeId;
 
-    // Seed color picker with the shape's original stroke color
-    const shape = library.find(s => s.id === shapeId);
-    if (shape) {
-      const orig = extractStrokeColor(shape.svgText);
-      slotColors[slot] = orig;
-      setColorUI(slot, orig);
-    }
-
-    renderLibrary();
-    updateSlotUI(slot);
-    updateSlotUI(other);
-    renderComposite();
-    updateStatus();
-    updateExportButtons();
+    refresh();
   }
 
   function clearSlot(slot) {
     slots[slot] = null;
-    renderLibrary();
-    updateSlotUI(slot);
-    renderComposite();
-    updateStatus();
-    updateExportButtons();
+    refresh();
   }
 
   function removeShape(id) {
     const idx = library.findIndex(s => s.id === id);
     if (idx !== -1) library.splice(idx, 1);
-    if (slots.outer === id) { slots.outer = null; updateSlotUI('outer'); }
-    if (slots.inner === id) { slots.inner = null; updateSlotUI('inner'); }
-    renderLibrary();
-    renderComposite();
-    updateStatus();
-    updateExportButtons();
-    updateRandomBtn();
+    if (slots.outer === id) slots.outer = null;
+    if (slots.inner === id) slots.inner = null;
+    refresh();
   }
 
-  function updateSlotUI(slot) {
-    const shape = library.find(s => s.id === slots[slot]);
-    const preview = document.getElementById(`slot-${slot}-preview`);
-    const empty = document.getElementById(`slot-${slot}-empty`);
-    const nameEl = document.getElementById(`slot-${slot}-name`);
-    const clearBtn = document.getElementById(`slot-${slot}-clear`);
-    const slotEl = document.getElementById(`slot-${slot}`);
-
-    if (shape) {
-      empty.style.display = 'none';
-      preview.style.display = 'flex';
-      preview.innerHTML = '';
-      const thumb = svgForThumb(shape.svgText);
-      preview.appendChild(thumb);
-      nameEl.textContent = shape.filename.replace(/\.svg$/i,'');
-      clearBtn.style.display = '';
-      slotEl.classList.add('has-shape');
-    } else {
-      empty.style.display = '';
-      preview.style.display = 'none';
-      nameEl.textContent = '—';
-      clearBtn.style.display = 'none';
-      slotEl.classList.remove('has-shape');
-    }
+  function refresh() {
+    renderLibrary();
+    renderComposite();
+    updateButtons();
   }
 
   // ── Randomize ──────────────────────────────────────────────────
   function randomize() {
     if (library.length === 0) return;
     if (library.length === 1) {
-      slots.outer = library[0].id;
-      slots.inner = library[0].id;
+      slots.outer = slots.inner = library[0].id;
     } else {
       const shuffled = [...library].sort(() => Math.random() - 0.5);
       slots.outer = shuffled[0].id;
       slots.inner = shuffled[1].id;
     }
-    renderLibrary();
-    updateSlotUI('outer');
-    updateSlotUI('inner');
-    renderComposite();
-    updateStatus();
-    updateExportButtons();
-  }
-
-  function updateRandomBtn() {
-    document.getElementById('btn-random').disabled = library.length < 1;
+    refresh();
   }
 
   // ── Composite render ───────────────────────────────────────────
   function renderComposite() {
     const svg = document.getElementById('composite-svg');
-    const empty = document.getElementById('empty-state');
-    const W = config.canvasW;
-    const H = config.canvasH;
+    const W = config.canvasW, H = config.canvasH;
 
     svg.setAttribute('width', W);
     svg.setAttribute('height', H);
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-    const hasOuter = slots.outer !== null;
-    const hasInner = slots.inner !== null;
-    empty.style.display = (hasOuter || hasInner) ? 'none' : '';
-    if (!hasOuter && !hasInner) return;
-
-    // Background
-    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const bg = document.createElementNS(SVG_NS, 'rect');
     bg.setAttribute('width', W); bg.setAttribute('height', H);
     bg.setAttribute('fill', config.bgColor === 'transparent' ? 'none' : config.bgColor);
     svg.appendChild(bg);
 
+    const hasAny = slots.outer !== null || slots.inner !== null;
+    document.getElementById('empty-state').style.display = hasAny ? 'none' : '';
+    if (!hasAny) return;
+
     const cx = W / 2, cy = H / 2;
     const baseSize = Math.min(W, H) * 0.9;
-
-    if (hasOuter) {
-      const shape = library.find(s => s.id === slots.outer);
-      if (shape) appendShape(svg, shape, cx, cy, baseSize, slotColors.outer, config.strokeWidth);
-    }
-    if (hasInner) {
-      const shape = library.find(s => s.id === slots.inner);
-      if (shape) appendShape(svg, shape, cx, cy, baseSize * config.scale, slotColors.inner, config.strokeWidth);
-    }
+    const outer = library.find(s => s.id === slots.outer);
+    const inner = library.find(s => s.id === slots.inner);
+    if (outer) appendShape(svg, outer, cx, cy, baseSize, slotColors.outer, config.strokeWidth);
+    if (inner) appendShape(svg, inner, cx, cy, baseSize * config.scale, slotColors.inner, config.strokeWidth);
   }
 
   function appendShape(svg, shape, cx, cy, size, strokeColor, strokeWidth) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(shape.svgText, 'image/svg+xml');
-    const sourceSVG = doc.querySelector('svg');
+    const sourceSVG = new DOMParser().parseFromString(shape.svgText, 'image/svg+xml').querySelector('svg');
     if (!sourceSVG) return;
-    sourceSVG.querySelectorAll('script').forEach(n => n.remove());
 
     const vb = shape.viewBox;
     const scale = Math.min(size / vb.w, size / vb.h);
-    const scaledW = vb.w * scale;
-    const scaledH = vb.h * scale;
-    const tx = cx - scaledW / 2 - vb.x * scale;
-    const ty = cy - scaledH / 2 - vb.y * scale;
+    const tx = cx - (vb.w * scale) / 2 - vb.x * scale;
+    const ty = cy - (vb.h * scale) / 2 - vb.y * scale;
 
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const g = document.createElementNS(SVG_NS, 'g');
     g.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
-
     Array.from(sourceSVG.childNodes).forEach(child => {
-      try { g.appendChild(svg.ownerDocument.importNode(child, true)); } catch(e){}
+      try { g.appendChild(document.importNode(child, true)); } catch(e){}
     });
-
-    // Override stroke color and width on every drawn element.
-    // vector-effect="non-scaling-stroke" keeps px width independent of the scale transform.
-    // Remove <style> blocks FIRST so their CSS doesn't override our inline styles
-    g.querySelectorAll('style').forEach(s => { s.remove(); });
-    g.querySelectorAll('path,circle,ellipse,rect,line,polyline,polygon').forEach(el => {
-      el.setAttribute('vector-effect', 'non-scaling-stroke');
-      // Use inline style (highest specificity) to override any CSS class rules in the source SVG
-      el.style.stroke = strokeColor;
-      el.style.strokeWidth = strokeWidth + 'px';
-    });
-
+    // vector-effect="non-scaling-stroke" keeps px width independent of the scale transform
+    restyle(g, strokeColor, strokeWidth);
     svg.appendChild(g);
   }
 
-  // ── Controls ───────────────────────────────────────────────────
+  // Fit the canvas preview inside the stage (the SVG scales via its viewBox)
+  function fitCanvas() {
+    const stage = document.getElementById('stage');
+    const svg = document.getElementById('composite-svg');
+    const mobile = window.matchMedia('(max-width: 820px)').matches;
+    const padX = mobile ? 32 : 120, padY = mobile ? 56 : 160;
+    const k = Math.min((stage.clientWidth - padX) / config.canvasW, (stage.clientHeight - padY) / config.canvasH, 1);
+    svg.style.width = `${Math.max(0, config.canvasW * k)}px`;
+    svg.style.height = `${Math.max(0, config.canvasH * k)}px`;
+  }
 
+  // ── Controls ───────────────────────────────────────────────────
   function onStrokeChange(val) {
     config.strokeWidth = parseFloat(val);
-    document.getElementById('stroke-value').textContent = `${val}px`;
+    document.getElementById('stroke-value').textContent = `${val} px`;
     renderComposite();
   }
 
   const PRESET_COLORS = [
-    '#13131E','#186666','#B8D12A','#AA5639','#3F28B2','#72DDAA','#D0FF0B',
+    '#FFFFFF','#13131E','#186666','#B8D12A','#AA5639','#3F28B2','#72DDAA','#D0FF0B',
     '#FF9566','#633BF2','#E8E8E8','#ABABB7','#DFF4EB','#D5F7C1','#E3C0F2'
   ];
 
@@ -983,41 +704,40 @@
     ['outer','inner'].forEach(slot => {
       const container = document.getElementById(`palette-${slot}`);
       PRESET_COLORS.forEach(color => {
-        const sw = document.createElement('div');
-        sw.className = 'preset-swatch';
+        const sw = document.createElement('button');
+        sw.className = 'swatch';
         sw.style.background = color;
         sw.title = color;
         sw.dataset.color = color;
-        sw.onclick = () => setPresetColor(slot, color);
+        sw.onclick = () => { setSlotColor(slot, color); renderComposite(); };
         container.appendChild(sw);
       });
     });
   }
 
-  function setPresetColor(slot, hex) {
-    slotColors[slot] = hex;
-    document.getElementById(`color-${slot}`).value = hex;
-    document.getElementById(`hex-${slot}`).value = hex.toUpperCase();
-    document.querySelectorAll(`#palette-${slot} .preset-swatch`).forEach(sw => {
-      sw.classList.toggle('active', sw.dataset.color.toUpperCase() === hex.toUpperCase());
+  function setSlotColor(slot, hex) {
+    const h = hex.toUpperCase();
+    slotColors[slot] = h;
+    document.getElementById(`color-${slot}`).value = h.toLowerCase();
+    document.getElementById(`hex-${slot}`).value = h;
+    document.querySelectorAll(`#palette-${slot} .swatch`).forEach(sw => {
+      sw.classList.toggle('active', sw.dataset.color.toUpperCase() === h);
     });
-    renderComposite();
   }
 
   function onColorChange(slot, hex) {
-    slotColors[slot] = hex;
-    document.getElementById(`hex-${slot}`).value = hex.toUpperCase();
-    document.querySelectorAll(`#palette-${slot} .preset-swatch`).forEach(sw => {
-      sw.classList.toggle('active', sw.dataset.color.toUpperCase() === hex.toUpperCase());
-    });
+    setSlotColor(slot, hex);
     renderComposite();
   }
 
   function onHexInput(slot, val) {
     const hex = val.startsWith('#') ? val : '#' + val;
     if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
-      slotColors[slot] = hex;
-      document.getElementById(`color-${slot}`).value = hex;
+      slotColors[slot] = hex.toUpperCase();
+      document.getElementById(`color-${slot}`).value = hex.toLowerCase();
+      document.querySelectorAll(`#palette-${slot} .swatch`).forEach(sw => {
+        sw.classList.toggle('active', sw.dataset.color.toUpperCase() === hex.toUpperCase());
+      });
       renderComposite();
     }
   }
@@ -1026,132 +746,78 @@
     document.getElementById(`hex-${slot}`).value = slotColors[slot].toUpperCase();
   }
 
-  function applyBgToViewport(color) {
-    const viewport = document.getElementById('canvas-viewport');
-    viewport.style.background = color === 'transparent'
-      ? 'repeating-conic-gradient(#bbb 0% 25%, #e8e8e8 0% 50%) 0 0 / 20px 20px'
-      : color;
-  }
-
   function setBg(el) {
-    document.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#bg-swatches .swatch').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
     config.bgColor = el.dataset.color;
-    applyBgToViewport(config.bgColor);
+    applyStageBg();
     renderComposite();
   }
 
-  function setCustomBg(val) {
-    document.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
-    config.bgColor = val;
-    applyBgToViewport(val);
-    renderComposite();
+  // The stage itself wears the background, so the shape floats without a frame
+  function applyStageBg() {
+    const dark = DARK_BGS.includes(config.bgColor);
+    const stage = document.getElementById('stage');
+    stage.style.background = config.bgColor === 'transparent' ? '' : config.bgColor;
+    stage.classList.toggle('dark', dark);
+    const [from, to] = dark ? [INK.light, INK.dark] : [INK.dark, INK.light];
+    ['outer', 'inner'].forEach(slot => { if (slotColors[slot] === from) setSlotColor(slot, to); });
   }
 
   function setSize(w, h, btn) {
     config.canvasW = w; config.canvasH = h;
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.size-grid .pill').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
-    applyCanvasSize();
-  }
-
-  function applyCustomSize() {
-    const w = parseInt(document.getElementById('custom-w').value);
-    const h = parseInt(document.getElementById('custom-h').value);
-    if (w >= 100 && h >= 100) {
-      config.canvasW = w; config.canvasH = h;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-      applyCanvasSize();
-    }
-  }
-
-  function applyCanvasSize() {
-    const frame = document.getElementById('canvas-frame');
-    frame.style.width = `${config.canvasW}px`;
-    frame.style.height = `${config.canvasH}px`;
-    const svg = document.getElementById('composite-svg');
-    svg.style.width = `${config.canvasW}px`;
-    svg.style.height = `${config.canvasH}px`;
+    document.getElementById('stage-meta').textContent = `${w} × ${h}`;
     renderComposite();
-    setTimeout(resetZoom, 50);
+    fitCanvas();
   }
 
-  // ── Zoom ───────────────────────────────────────────────────────
-  function zoom(delta) {
-    config.zoom = Math.max(0.1, Math.min(4, config.zoom + delta));
-    applyZoom();
-  }
-
-  function resetZoom() {
-    const viewport = document.getElementById('canvas-viewport');
-    const vw = viewport.clientWidth - 80;
-    const vh = viewport.clientHeight - 80;
-    config.zoom = Math.min(vw / config.canvasW, vh / config.canvasH, 1);
-    applyZoom();
-  }
-
-  function applyZoom() {
-    const frame = document.getElementById('canvas-frame');
-    frame.style.transform = `scale(${config.zoom})`;
-    frame.style.transformOrigin = 'center center';
-    document.getElementById('zoom-label').textContent = `${Math.round(config.zoom * 100)}%`;
-  }
-
-  // ── Status ─────────────────────────────────────────────────────
-  function updateStatus() {
-    const dot = document.getElementById('status-dot');
-    const text = document.getElementById('status-text');
-    if (slots.outer !== null && slots.inner !== null) {
-      dot.className = 'status-dot ready'; text.textContent = 'Composite ready';
-    } else if (slots.outer !== null || slots.inner !== null) {
-      dot.className = 'status-dot partial'; text.textContent = slots.outer ? 'Set inner shape' : 'Set outer shape';
-    } else if (library.length > 0) {
-      dot.className = 'status-dot'; dot.style.background = ''; text.textContent = 'Assign shapes to slots';
-    } else {
-      dot.className = 'status-dot'; dot.style.background = ''; text.textContent = 'Add shapes to the library';
-    }
-  }
-
-  function updateExportButtons() {
+  function updateButtons() {
     const has = slots.outer !== null || slots.inner !== null;
     document.getElementById('btn-svg').disabled = !has;
     document.getElementById('btn-png').disabled = !has;
+    document.querySelectorAll('[onclick="randomize()"]').forEach(b => b.disabled = library.length < 1);
   }
 
   // ── Export ─────────────────────────────────────────────────────
-  function exportSVG() {
-    const svg = document.getElementById('composite-svg');
-    const clone = svg.cloneNode(true);
+  function compositeString() {
+    const clone = document.getElementById('composite-svg').cloneNode(true);
     clone.removeAttribute('style');
-    let str = new XMLSerializer().serializeToString(clone);
-    if (!str.startsWith('<?xml')) str = '<?xml version="1.0" encoding="UTF-8"?>\n' + str;
-    download(URL.createObjectURL(new Blob([str], {type:'image/svg+xml'})), 'asset.svg');
+    clone.removeAttribute('class');
+    clone.removeAttribute('id');
+    clone.setAttribute('width', config.canvasW);
+    clone.setAttribute('height', config.canvasH);
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  function exportSVG() {
+    const str = '<?xml version="1.0" encoding="UTF-8"?>\n' + compositeString();
+    deliver(new Blob([str], { type: 'image/svg+xml' }), 'relvo-asset.svg');
   }
 
   function exportPNG() {
-    const svg = document.getElementById('composite-svg');
-    const clone = svg.cloneNode(true);
-    clone.removeAttribute('style');
-    clone.setAttribute('width', config.canvasW);
-    clone.setAttribute('height', config.canvasH);
-
-    const str = new XMLSerializer().serializeToString(clone);
-    const url = URL.createObjectURL(new Blob([str], {type:'image/svg+xml;charset=utf-8'}));
-
+    const url = URL.createObjectURL(new Blob([compositeString()], { type: 'image/svg+xml;charset=utf-8' }));
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = config.canvasW; canvas.height = config.canvasH;
-      const ctx = canvas.getContext('2d');
-      if (config.bgColor !== 'transparent') { ctx.fillStyle = config.bgColor; ctx.fillRect(0,0,canvas.width,canvas.height); }
-      ctx.drawImage(img, 0, 0);
+      canvas.getContext('2d').drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
-      canvas.toBlob(blob => download(URL.createObjectURL(blob), 'asset.png'), 'image/png');
+      canvas.toBlob(blob => deliver(blob, 'relvo-asset.png'), 'image/png');
     };
     img.src = url;
   }
 
-  function download(url, filename) {
+  // On phones, hand the file to the share sheet (save to Photos/Files); else download
+  async function deliver(blob, filename) {
+    const file = new File([blob], filename, { type: blob.type });
+    const touch = window.matchMedia('(pointer: coarse)').matches;
+    if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); return; }
+      catch (e) { if (e.name === 'AbortError') return; }
+    }
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = filename; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -1159,14 +825,7 @@
 
   // ── Shapes baked in ───────────────────────────────────────────
   function autoLoadShapes() {
-    for (const { name, svgText: raw } of PRELOADED_SHAPES) {
-      const svgText = sanitizeSVG(raw);
-      const viewBox = extractViewBox(svgText);
-      library.push({ id: nextId++, filename: name, svgText, viewBox });
-    }
-    renderLibrary();
-    updateRandomBtn();
-    updateStatus();
+    for (const { name, svgText } of PRELOADED_SHAPES) addShape(name, svgText);
   }
 
 const PRELOADED_SHAPES = [
@@ -1180,12 +839,13 @@ const PRELOADED_SHAPES = [
 ];
 
   // ── Init ───────────────────────────────────────────────────────
-  window.addEventListener('load', () => {
-    buildPalettes();
-    autoLoadShapes();
-    setTimeout(resetZoom, 100);
-  });
-  window.addEventListener('resize', resetZoom);
+  buildPalettes();
+  setSlotColor('outer', INK.light);
+  setSlotColor('inner', INK.light);
+  autoLoadShapes();
+  randomize();
+  new ResizeObserver(fitCanvas).observe(document.getElementById('stage'));
+  fitCanvas();
 </script>
 </body>
 </html>
